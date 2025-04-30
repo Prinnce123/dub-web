@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Dubbing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        video {
+            width: 100%;
+            margin-top: 20px;
+        }
+        #loading {
+            display: none;
+            font-size: 1.2em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dub a YouTube Video</h1>
+        <form id="dubForm">
+            <div>
+                <label for="videoURL">YouTube Video URL:</label>
+                <input type="url" id="videoURL" required>
+            </div>
+            <div>
+                <label for="language">Select Language:</label>
+                <select id="language">
+                    <option value="hi">Hindi</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <!-- Add more languages as required -->
+                </select>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="loading">Processing video, please wait...</div>
+        <video id="videoPlayer" controls style="display:none;"></video>
+    </div>
+
+    <script>
+        document.getElementById("dubForm").onsubmit = async function(event) {
+            event.preventDefault();
+            const videoURL = document.getElementById("videoURL").value;
+            const language = document.getElementById("language").value;
+
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("videoPlayer").style.display = "none";
+
+            const response = await fetch("/process-video", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ videoURL, language })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById("loading").style.display = "none";
+                const videoPlayer = document.getElementById("videoPlayer");
+                videoPlayer.src = result.streamURL;
+                videoPlayer.style.display = "block";
+                videoPlayer.load();
+            } else {
+                document.getElementById("loading").innerText = "An error occurred: " + result.error;
+            }
+        };
+    </script>
+</body>
+</html>
